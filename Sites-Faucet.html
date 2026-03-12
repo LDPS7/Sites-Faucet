@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Faucet List .pro</title>
+    <meta name="theme-color" content="#0b1424">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" as="style">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --blue-dark: #0b1424;
+            --blue-accent: #3b98ff;
+            --blue-light: #79c0ff;
+            --blue-pale: #b8dcff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        #particle-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; z-index: 5;
+        }
+
+        body {
+            font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+            background: var(--blue-dark);
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            position: relative; overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            cursor: default;
+        }
+
+        @media (max-width: 680px) { body { cursor: auto; } }
+
+        .mining-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1621761191319-c6fb62004040?q=80&w=1200&auto=format&fit=crop');
+            background-size: cover; background-position: center 25%;
+            filter: brightness(0.4) saturate(1.3); z-index: 0;
+        }
+
+        .bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 30% 40%, rgba(8,28,55,0.7), rgba(2,12,28,0.9));
+            z-index: 1;
+        }
+
+        /* LIVE BAR */
+        .live-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(0,10,25,0.85);
+            border-bottom: 1px solid rgba(59,152,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            gap: 2rem; padding: 0.4rem 1rem;
+            font-family: 'Space Mono', monospace; font-size: 0.75rem;
+            color: var(--blue-light);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+
+        .live-dot {
+            width: 7px; height: 7px; background: #00ff88;
+            border-radius: 50%; display: inline-block; margin-right: 5px;
+            animation: pulse-dot 1.5s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:0.4; transform:scale(0.8); }
+        }
+
+        .live-stat { display: flex; align-items: center; gap: 5px; }
+        .live-stat span { color: #00ff88; font-weight: 700; }
+
+        /* TOASTS */
+        .toast-container {
+            position: fixed; bottom: 1.5rem; left: 1rem;
+            z-index: 200; display: flex; flex-direction: column;
+            gap: 0.5rem; pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(5,20,45,0.92);
+            border: 1px solid rgba(59,152,255,0.4); border-radius: 12px;
+            padding: 10px 14px; color: var(--blue-pale);
+            font-size: 0.8rem; display: flex; align-items: center; gap: 10px;
+            transform: translateX(-120%); opacity: 0;
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            max-width: 260px;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+
+        .toast.show { transform: translateX(0); opacity: 1; }
+        .toast-icon { font-size: 1.1rem; }
+        .toast-text strong { color: #00ff88; }
+
+        /* MAIN */
+        .main-content {
+            position: relative; z-index: 15; flex: 1;
+            display: flex; flex-direction: column; align-items: center;
+            padding: 5rem 1rem 3rem; width: 100%;
+            max-width: 1400px; margin: 0 auto;
+        }
+
+        .page-header { text-align: center; margin-bottom: 2.5rem; width: 100%; }
+
+        .page-header h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: clamp(2.4rem, 8vw, 5rem);
+            font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+            background: linear-gradient(135deg, #b8dcff, #79c0ff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* GRID */
+        .mining-grid {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 1.8rem 1.2rem; width: 100%;
+        }
+
+        .phone-card {
+            flex: 0 1 280px; min-width: 260px; width: 100%; max-width: 320px;
+            display: flex; flex-direction: column; align-items: center;
+            transition: transform 0.25s ease;
+            cursor: default; position: relative;
+            -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+        }
+
+        @media (max-width: 680px) { .phone-card { cursor: pointer; } }
+
+        .phone-card:active { transform: scale(0.98); transition: transform 0.1s; }
+
+        /* Número do quadrado - SIMPLIFICADO */
+        .card-number {
+            position: absolute; top: 14px; left: 16px;
+            font-family: 'Space Mono', monospace; font-size: 0.9rem;
+            color: #00ff88; background: rgba(0,10,20,0.7);
+            border: 1px solid rgba(0,255,136,0.5); border-radius: 8px;
+            padding: 2px 8px; z-index: 3; pointer-events: none;
+            letter-spacing: 0px; font-weight: 700;
+        }
+
+        .phone-mock {
+            width: 100%; background: rgba(8,25,45,0.75);
+            border: 1.8px solid rgba(70,150,255,0.25); border-radius: 38px;
+            padding: 22px 12px 18px 12px;
+            box-shadow: 0 25px 40px -15px #001a33, inset 0 0 0 1px rgba(255,255,255,0.05);
+            transition: border-color 0.2s, box-shadow 0.3s;
+        }
+
+        @supports (backdrop-filter: blur(14px)) {
+            .phone-mock {
+                background: rgba(8,25,45,0.3);
+                backdrop-filter: blur(14px) saturate(180%);
+                -webkit-backdrop-filter: blur(14px) saturate(180%);
+            }
+        }
+
+        .phone-card:hover .phone-mock {
+            border-color: #3b98ff;
+            box-shadow: 0 30px 50px -12px #004a99, 0 0 0 2px rgba(0,160,255,0.4);
+        }
+
+        .phone-notch {
+            width: 100px; height: 25px; background: rgba(0,0,0,0.3);
+            border-radius: 30px; margin: -12px auto 14px auto;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .phone-screen {
+            background: rgba(0,10,25,0.2); border-radius: 24px;
+            padding: 18px 8px; display: flex; flex-direction: column;
+            align-items: center; gap: 10px;
+        }
+
+        /* Imagem da mineradora */
+        .miner-img {
+            width: 88px; height: 88px; margin: 0 auto;
+            border-radius: 20px; object-fit: cover;
+            filter: drop-shadow(0 0 14px rgba(100,180,255,0.6));
+            transition: transform 0.3s ease, filter 0.3s;
+            animation: floatCloud 4s infinite ease-in-out;
+            background: rgba(0,20,50,0.4);
+        }
+
+        .phone-card:hover .miner-img {
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 22px #3b98ff);
+        }
+
+        @keyframes floatCloud {
+            0%   { transform: translateY(0px); }
+            50%  { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .miner-name {
+            font-size: 1.55rem; font-weight: 700; text-align: center;
+            background: linear-gradient(to right, #ffffff, #b3dbff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            letter-spacing: 0.02em; margin: 4px 0 2px; line-height: 1.2;
+            font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
+        }
+
+        .miner-sub {
+            font-size: 0.7rem; color: #9bbdf0;
+            text-transform: uppercase; letter-spacing: 2px; font-family: 'Space Mono', monospace;
+        }
+
+        /* BOTÕES */
+        .btn-wrap { width: 100%; margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+
+        .mining-btn {
+            display: inline-block; width: 100%; padding: 14px 10px;
+            background: rgba(0,40,75,0.5); border: 1px solid rgba(0,170,255,0.5);
+            border-radius: 60px; color: white; font-weight: 700; font-size: 1.05rem;
+            text-align: center; text-decoration: none; letter-spacing: 1px;
+            transition: all 0.25s ease; box-shadow: 0 8px 22px -8px #002d5a;
+            position: relative; overflow: hidden;
+            -webkit-tap-highlight-color: transparent; cursor: default;
+            font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
+        }
+
+        @media (max-width: 680px) { .mining-btn { cursor: pointer; } }
+
+        .mining-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: left 0.5s;
+        }
+
+        .mining-btn:hover {
+            background: rgba(0,90,180,0.75); border-color: #7ac4ff;
+            box-shadow: 0 12px 30px -5px #0066cc, 0 0 18px #0088ff;
+            transform: scale(1.02);
+        }
+
+        .mining-btn:hover::before { left: 150%; }
+        .mining-btn:active { transform: scale(0.98); background: rgba(0,70,150,0.9); }
+
+        /* RESPONSIVE */
+        @media (max-width: 680px) {
+            .main-content { padding: 4.5rem 0.8rem 2rem; }
+            .phone-card { flex: 0 1 300px; max-width: 300px; }
+            .miner-img { width: 72px; height: 72px; }
+            .miner-name { font-size: 1.4rem; }
+            .live-bar { font-size: 0.7rem; gap: 1rem; }
+        }
+
+        @media (max-width: 380px) { .phone-card { min-width: 240px; } }
+
+    </style>
+</head>
+<body>
+    <div class="mining-bg"></div>
+    <div class="bg-overlay"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="live-bar">
+        <div class="live-stat"><span class="live-dot"></span><span id="liveCount">142</span> online agora</div>
+        <div class="live-stat">💰 <span id="liveEarned">2.45k</span> pagos hoje</div>
+        <div class="live-stat">🔗 <span id="liveClicks">3.2k</span> cliques hoje</div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>FAUCET<span style="font-weight:400;opacity:0.7;">.HUB</span></h1>
+        </div>
+
+        <div class="mining-grid" id="faucetGrid">
+            <!-- A grid será preenchida via JavaScript -->
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        // ===== LISTA DE FAUCETS =====
+        const faucetList = [
+            { name: "Althub", sub: "club faucet", url: "https://althub.club/r/206100", coin: "TRX" },
+            { name: "Ads Bitcoin", sub: "bitcoin ads", url: "http://ads-bitcoin.com/btc/?r=1767", coin: "BTC" },
+            { name: "Doge Pick", sub: "pick doge", url: "https://dogepick.io/?ref=lucianoldps7", coin: "DOGE" },
+            { name: "Cekip Faucet", sub: "cekip site", url: "https://faucet.cekip.site/?r=5770", coin: "BTC" },
+            { name: "Ton Pick", sub: "pick ton", url: "https://tonpick.game/?ref=lucianoldps7", coin: "TON" },
+            { name: "Faucet Crypto", sub: "crypto faucet", url: "https://faucetcrypto.com/r/4188807", coin: "BTC" },
+            { name: "Faucetoshi", sub: "faucetoshi", url: "https://faucetoshi.com/?r=188401", coin: "BTC" },
+            { name: "Sol Pick", sub: "pick sol", url: "https://solpick.io/?ref=lucianoldps", coin: "SOL" },
+            { name: "Bitcoi News", sub: "bitcoin news", url: "https://bitcoi.news/?r=33251", coin: "BTC" },
+            { name: "Earn Bonk", sub: "earn bonk", url: "https://earn-bonk.com/?r=9057c178c9f9", coin: "BONK" },
+            { name: "Earn Pepe", sub: "earn pepe", url: "https://earn-pepe.com/?ref=nZJG", coin: "PEPE" },
+            { name: "Feyorra", sub: "feyorra site", url: "https://feyorra.site/?ref=BQe5", coin: "BTC" },
+            { name: "Earn Trump", sub: "earn trump", url: "https://earn-trump.com/?r=8857fe7b878a", coin: "TRUMP" },
+            { name: "Ban Faucet", sub: "ban faucet", url: "https://banfaucet.com/?r=238156", coin: "BTC" },
+            { name: "Lite Stake", sub: "lite stake", url: "https://litestake.io/?ref=lucianoldps7", coin: "LTC" },
+            { name: "Fire Faucet", sub: "fire faucet", url: "https://firefaucet.win/ref/1540547", coin: "BTC" },
+            { name: "LTC Fast", sub: "ltc fast live", url: "https://ltcfast.live?ref=lucianoldps", coin: "LTC" },
+            { name: "Free Ton Coin", sub: "free ton coin", url: "https://freetoncoin.in?ref=asvt3n4mKW", coin: "TON" },
+            { name: "Free BNB", sub: "free bnb", url: "https://freebnb.in?ref=C6XK04weNv", coin: "BNB" }
+        ];
+
+        // ===== GERAR GRID =====
+        const grid = document.getElementById('faucetGrid');
+        faucetList.forEach((faucet, index) => {
+            // Tenta extrair o domínio para a imagem de fallback
+            let domain = '';
+            try {
+                domain = new URL(faucet.url).hostname.replace('www.', '');
+            } catch (e) {
+                domain = 'faucet';
+            }
+
+            const card = document.createElement('div');
+            card.className = 'phone-card';
+            card.innerHTML = `
+                <span class="card-number">${index + 1}</span>
+                <div class="phone-mock">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <img class="miner-img" loading="lazy" decoding="async" 
+                             src="https://www.google.com/s2/favicons?domain=${domain}&sz=128" 
+                             onerror="this.src='https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530/128/color/${faucet.coin.toLowerCase()}.png'; this.onerror=null;"
+                             alt="${faucet.name}">
+                        <div class="miner-name">${faucet.name}</div>
+                        <div class="miner-sub">${faucet.sub}</div>
+                    </div>
+                </div>
+                <div class="btn-wrap">
+                    <a href="${faucet.url}" class="mining-btn" target="_blank" rel="noopener" onclick="trackClick('${faucet.name}')">▶ Acessar Faucet</a>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        // ===== CLICK TRACKER =====
+        window.trackClick = function(name){
+            console.log('Clique rastreado:', name);
+            // Atualiza o contador de cliques
+            const liveClicksEl = document.getElementById('liveClicks');
+            if (liveClicksEl) {
+                let current = parseInt(liveClicksEl.textContent.replace(/[^0-9]/g, '')) || 3200;
+                liveClicksEl.textContent = (current + 1).toLocaleString();
+            }
+        };
+
+        // ===== TOASTS =====
+        const names = ['Carlos','Maria','João','Ana','Pedro','Luisa','Rafael','Beatriz','Lucas','Fernanda'];
+        const tc = document.getElementById('toastContainer');
+
+        function showToast(){
+            const n = names[Math.floor(Math.random() * names.length)];
+            const f = faucetList[Math.floor(Math.random() * faucetList.length)].name;
+            const amount = (Math.random() * 15 + 2).toFixed(1);
+            
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.innerHTML = `<span class="toast-icon">💸</span><span class="toast-text"><strong>${n}</strong> ganhou ${amount} USDT no ${f}</span>`;
+            tc.appendChild(t);
+            
+            requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+            
+            setTimeout(() => { 
+                t.classList.remove('show'); 
+                setTimeout(() => t.remove(), 450); 
+            }, 4000);
+            
+            while(tc.children.length > 2) tc.removeChild(tc.firstChild);
+        }
+        setTimeout(showToast, 2000);
+        setInterval(showToast, 8000);
+
+        // ===== LIVE BAR =====
+        let liveCount = 142;
+        let liveEarned = 2450;
+        const liveCountEl = document.getElementById('liveCount');
+        const liveEarnedEl = document.getElementById('liveEarned');
+        const liveClicksEl = document.getElementById('liveClicks');
+
+        function updateLiveBar(){
+            liveCount += Math.floor(Math.random() * 5) - 2;
+            liveCount = Math.max(120, Math.min(180, liveCount));
+            
+            if (Math.random() > 0.7) {
+                liveEarned += Math.floor(Math.random() * 15);
+            }
+            
+            if (liveCountEl) liveCountEl.textContent = liveCount;
+            if (liveEarnedEl) liveEarnedEl.textContent = (liveEarned / 1000).toFixed(1) + 'k';
+            if (liveClicksEl) {
+                let clicks = parseInt(liveClicksEl.textContent.replace(/[^0-9]/g, '')) || 3200;
+                clicks += Math.floor(Math.random() * 5);
+                liveClicksEl.textContent = clicks.toLocaleString();
+            }
+        }
+        setInterval(updateLiveBar, 7000);
+        updateLiveBar();
+
+        // ===== PARTÍCULAS DE FUNDO =====
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let W, H, particles = [], animId;
+
+        function initP(){
+            const cnt = window.innerWidth < 768 ? 15 : 28;
+            particles = [];
+            for(let i = 0; i < cnt; i++) particles.push({
+                x: Math.random() * W, y: Math.random() * H,
+                vx: (Math.random() - .5) * .5, vy: (Math.random() - .2) * .4 + .7,
+                size: Math.random() * 2.5 + .8, history: [],
+                maxH: Math.floor(Math.random() * 5) + 4,
+                alpha: Math.random() * .5 + .2
+            });
+        }
+
+        function resizeC(){
+            W = window.innerWidth; H = window.innerHeight;
+            canvas.width = W; canvas.height = H; initP();
+        }
+
+        function updateP(){
+            for(let p of particles){
+                p.history.push({x: p.x, y: p.y});
+                if(p.history.length > p.maxH) p.history.shift();
+                p.x += p.vx; p.y += p.vy;
+                if(p.y > H + 25){ p.y = -15; p.x = Math.random() * W; p.history = []; }
+                if(p.x < -25) p.x = W + 25; if(p.x > W + 25) p.x = -25;
+                p.vx += (Math.random() - .5) * .02; p.vy += (Math.random() - .3) * .01;
+                p.vx = Math.min(Math.max(p.vx, -.9), .9);
+                p.vy = Math.min(Math.max(p.vy, .2), 1.3);
+            }
+        }
+
+        function drawP(){
+            ctx.clearRect(0, 0, W, H);
+            for(let p of particles){
+                if(p.history.length > 1){
+                    for(let i = 0; i < p.history.length - 1; i++){
+                        const s = p.history[i], n = p.history[i + 1];
+                        ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(n.x, n.y);
+                        ctx.strokeStyle = `rgba(110,180,255,${(i/p.history.length)*.35*p.alpha})`;
+                        ctx.lineWidth = p.size * (i/p.history.length) * 1.4; ctx.stroke();
+                    }
+                }
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size * 1.2, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(190,225,255,${p.alpha + .25})`; ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size * .6, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fill();
+            }
+        }
+
+        function animate(){ updateP(); drawP(); animId = requestAnimationFrame(animate); }
+        document.addEventListener('visibilitychange', () => { if(document.hidden) cancelAnimationFrame(animId); else animate(); });
+        window.addEventListener('resize', resizeC);
+        resizeC(); animate();
+
+        // ===== TRAIL SIMPLES: PARTÍCULAS VERDES =====
+        const tCanvas = document.createElement('canvas');
+        tCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;';
+        document.body.appendChild(tCanvas);
+        const tCtx = tCanvas.getContext('2d');
+
+        function resizeT(){ tCanvas.width = window.innerWidth; tCanvas.height = window.innerHeight; }
+        window.addEventListener('resize', resizeT); resizeT();
+
+        const dots = [];
+        let lastMx = 0, lastMy = 0;
+
+        function spawnDots(x, y){
+            const n = 2 + Math.floor(Math.random() * 3);
+            for(let i = 0; i < n; i++){
+                dots.push({
+                    x, y,
+                    vx: (Math.random() - .5) * 1.4,
+                    vy: (Math.random() - .5) * 1.4,
+                    r: Math.random() * 1.2 + 0.4,
+                    life: 1,
+                    decay: 0.10 + Math.random() * 0.08,
+                });
+            }
+            if(dots.length > 70) dots.splice(0, dots.length - 70);
+        }
+
+        function trailLoop(){
+            tCtx.clearRect(0, 0, tCanvas.width, tCanvas.height);
+            for(let i = dots.length - 1; i >= 0; i--){
+                const d = dots[i];
+                d.x += d.vx; d.y += d.vy;
+                d.life -= d.decay;
+                if(d.life <= 0){ dots.splice(i, 1); continue; }
+                tCtx.globalAlpha = d.life * 0.85;
+                tCtx.beginPath();
+                tCtx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+                tCtx.fillStyle = '#00ff88';
+                tCtx.fill();
+            }
+            tCtx.globalAlpha = 1;
+            requestAnimationFrame(trailLoop);
+        }
+        trailLoop();
+
+        document.addEventListener('mousemove', (e) => {
+            const dist = Math.hypot(e.clientX - lastMx, e.clientY - lastMy);
+            if(dist < 1) return;
+            lastMx = e.clientX; lastMy = e.clientY;
+            spawnDots(e.clientX, e.clientY);
+            for(let p of particles){
+                if(Math.random() > .97){ p.vx += dist * .0008; p.vy += dist * .0004; }
+            }
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if(!e.touches[0]) return;
+            const tx = e.touches[0].clientX, ty = e.touches[0].clientY;
+            const dist = Math.hypot(tx - lastMx, ty - lastMy);
+            if(dist < 3) return;
+            lastMx = tx; lastMy = ty;
+            spawnDots(tx, ty);
+        }, {passive: true});
+
+        document.addEventListener('touchend', () => { dots.length = 0; });
+        document.addEventListener('touchcancel', () => { dots.length = 0; });
+
+    })();
+    </script>
+</body>
+</html>
