@@ -52,60 +52,11 @@
             z-index: 1;
         }
 
-        /* LIVE BAR */
-        .live-bar {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            background: rgba(0,10,25,0.85);
-            border-bottom: 1px solid rgba(59,152,255,0.3);
-            display: flex; align-items: center; justify-content: center;
-            gap: 2rem; padding: 0.4rem 1rem;
-            font-family: 'Space Mono', monospace; font-size: 0.75rem;
-            color: var(--blue-light);
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-        }
-
-        .live-dot {
-            width: 7px; height: 7px; background: #00ff88;
-            border-radius: 50%; display: inline-block; margin-right: 5px;
-            animation: pulse-dot 1.5s infinite;
-        }
-
-        @keyframes pulse-dot {
-            0%,100% { opacity:1; transform:scale(1); }
-            50% { opacity:0.4; transform:scale(0.8); }
-        }
-
-        .live-stat { display: flex; align-items: center; gap: 5px; }
-        .live-stat span { color: #00ff88; font-weight: 700; }
-
-        /* TOASTS */
-        .toast-container {
-            position: fixed; bottom: 1.5rem; left: 1rem;
-            z-index: 200; display: flex; flex-direction: column;
-            gap: 0.5rem; pointer-events: none;
-        }
-
-        .toast {
-            background: rgba(5,20,45,0.92);
-            border: 1px solid rgba(59,152,255,0.4); border-radius: 12px;
-            padding: 10px 14px; color: var(--blue-pale);
-            font-size: 0.8rem; display: flex; align-items: center; gap: 10px;
-            transform: translateX(-120%); opacity: 0;
-            transition: transform 0.4s ease, opacity 0.4s ease;
-            max-width: 260px;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        }
-
-        .toast.show { transform: translateX(0); opacity: 1; }
-        .toast-icon { font-size: 1.1rem; }
-        .toast-text strong { color: #00ff88; }
-
         /* MAIN */
         .main-content {
             position: relative; z-index: 15; flex: 1;
             display: flex; flex-direction: column; align-items: center;
-            padding: 5rem 1rem 3rem; width: 100%;
+            padding: 2rem 1rem 3rem; width: 100%;
             max-width: 1400px; margin: 0 auto;
         }
 
@@ -138,7 +89,6 @@
 
         .phone-card:active { transform: scale(0.98); transition: transform 0.1s; }
 
-        /* Número do quadrado - SIMPLIFICADO */
         .card-number {
             position: absolute; top: 14px; left: 16px;
             font-family: 'Space Mono', monospace; font-size: 0.9rem;
@@ -181,7 +131,6 @@
             align-items: center; gap: 10px;
         }
 
-        /* Imagem da mineradora */
         .miner-img {
             width: 88px; height: 88px; margin: 0 auto;
             border-radius: 20px; object-fit: cover;
@@ -210,13 +159,8 @@
             font-family: 'Rajdhani', sans-serif; text-transform: uppercase;
         }
 
-        .miner-sub {
-            font-size: 0.7rem; color: #9bbdf0;
-            text-transform: uppercase; letter-spacing: 2px; font-family: 'Space Mono', monospace;
-        }
-
         /* BOTÕES */
-        .btn-wrap { width: 100%; margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+        .btn-wrap { width: 100%; margin-top: 14px; }
 
         .mining-btn {
             display: inline-block; width: 100%; padding: 14px 10px;
@@ -249,15 +193,13 @@
 
         /* RESPONSIVE */
         @media (max-width: 680px) {
-            .main-content { padding: 4.5rem 0.8rem 2rem; }
+            .main-content { padding: 1.5rem 0.8rem 2rem; }
             .phone-card { flex: 0 1 300px; max-width: 300px; }
             .miner-img { width: 72px; height: 72px; }
             .miner-name { font-size: 1.4rem; }
-            .live-bar { font-size: 0.7rem; gap: 1rem; }
         }
 
         @media (max-width: 380px) { .phone-card { min-width: 240px; } }
-
     </style>
 </head>
 <body>
@@ -265,59 +207,44 @@
     <div class="bg-overlay"></div>
     <canvas id="particle-canvas"></canvas>
 
-    <div class="live-bar">
-        <div class="live-stat"><span class="live-dot"></span><span id="liveCount">142</span> online agora</div>
-        <div class="live-stat">💰 <span id="liveEarned">2.45k</span> pagos hoje</div>
-        <div class="live-stat">🔗 <span id="liveClicks">3.2k</span> cliques hoje</div>
-    </div>
-
-    <div class="toast-container" id="toastContainer"></div>
-
     <div class="main-content">
         <div class="page-header">
             <h1>FAUCET<span style="font-weight:400;opacity:0.7;">.HUB</span></h1>
         </div>
 
-        <div class="mining-grid" id="faucetGrid">
-            <!-- A grid será preenchida via JavaScript -->
-        </div>
+        <div class="mining-grid" id="faucetGrid"></div>
     </div>
 
     <script>
     (function () {
         // ===== LISTA DE FAUCETS =====
         const faucetList = [
-            { name: "Althub", sub: "club faucet", url: "https://althub.club/r/206100", coin: "TRX" },
-            { name: "Ads Bitcoin", sub: "bitcoin ads", url: "http://ads-bitcoin.com/btc/?r=1767", coin: "BTC" },
-            { name: "Doge Pick", sub: "pick doge", url: "https://dogepick.io/?ref=lucianoldps7", coin: "DOGE" },
-            { name: "Cekip Faucet", sub: "cekip site", url: "https://faucet.cekip.site/?r=5770", coin: "BTC" },
-            { name: "Ton Pick", sub: "pick ton", url: "https://tonpick.game/?ref=lucianoldps7", coin: "TON" },
-            { name: "Faucet Crypto", sub: "crypto faucet", url: "https://faucetcrypto.com/r/4188807", coin: "BTC" },
-            { name: "Faucetoshi", sub: "faucetoshi", url: "https://faucetoshi.com/?r=188401", coin: "BTC" },
-            { name: "Sol Pick", sub: "pick sol", url: "https://solpick.io/?ref=lucianoldps", coin: "SOL" },
-            { name: "Bitcoi News", sub: "bitcoin news", url: "https://bitcoi.news/?r=33251", coin: "BTC" },
-            { name: "Earn Bonk", sub: "earn bonk", url: "https://earn-bonk.com/?r=9057c178c9f9", coin: "BONK" },
-            { name: "Earn Pepe", sub: "earn pepe", url: "https://earn-pepe.com/?ref=nZJG", coin: "PEPE" },
-            { name: "Feyorra", sub: "feyorra site", url: "https://feyorra.site/?ref=BQe5", coin: "BTC" },
-            { name: "Earn Trump", sub: "earn trump", url: "https://earn-trump.com/?r=8857fe7b878a", coin: "TRUMP" },
-            { name: "Ban Faucet", sub: "ban faucet", url: "https://banfaucet.com/?r=238156", coin: "BTC" },
-            { name: "Lite Stake", sub: "lite stake", url: "https://litestake.io/?ref=lucianoldps7", coin: "LTC" },
-            { name: "Fire Faucet", sub: "fire faucet", url: "https://firefaucet.win/ref/1540547", coin: "BTC" },
-            { name: "LTC Fast", sub: "ltc fast live", url: "https://ltcfast.live?ref=lucianoldps", coin: "LTC" },
-            { name: "Free Ton Coin", sub: "free ton coin", url: "https://freetoncoin.in?ref=asvt3n4mKW", coin: "TON" },
-            { name: "Free BNB", sub: "free bnb", url: "https://freebnb.in?ref=C6XK04weNv", coin: "BNB" }
+            { name: "Althub",        url: "https://althub.club/r/206100",                          coin: "TRX"   },
+            { name: "Ads Bitcoin",   url: "http://ads-bitcoin.com/btc/?r=1767",                    coin: "BTC"   },
+            { name: "Doge Pick",     url: "https://dogepick.io/?ref=lucianoldps7",                  coin: "DOGE"  },
+            { name: "Cekip Faucet",  url: "https://faucet.cekip.site/?r=5770",                     coin: "BTC"   },
+            { name: "Ton Pick",      url: "https://tonpick.game/?ref=lucianoldps7",                 coin: "TON"   },
+            { name: "Faucet Crypto", url: "https://faucetcrypto.com/r/4188807",                    coin: "BTC"   },
+            { name: "Faucetoshi",    url: "https://faucetoshi.com/?r=188401",                      coin: "BTC"   },
+            { name: "Sol Pick",      url: "https://solpick.io/?ref=lucianoldps",                   coin: "SOL"   },
+            { name: "Bitcoi News",   url: "https://bitcoi.news/?r=33251",                          coin: "BTC"   },
+            { name: "Earn Bonk",     url: "https://earn-bonk.com/?r=9057c178c9f9",                 coin: "BONK"  },
+            { name: "Earn Pepe",     url: "https://earn-pepe.com/?ref=nZJG",                       coin: "PEPE"  },
+            { name: "Feyorra",       url: "https://feyorra.site/?ref=BQe5",                        coin: "BTC"   },
+            { name: "Earn Trump",    url: "https://earn-trump.com/?r=8857fe7b878a",                coin: "TRUMP" },
+            { name: "Ban Faucet",    url: "https://banfaucet.com/?r=238156",                       coin: "BTC"   },
+            { name: "Lite Stake",    url: "https://litestake.io/?ref=lucianoldps7",                coin: "LTC"   },
+            { name: "Fire Faucet",   url: "https://firefaucet.win/ref/1540547",                    coin: "BTC"   },
+            { name: "LTC Fast",      url: "https://ltcfast.live?ref=lucianoldps",                  coin: "LTC"   },
+            { name: "Free Ton Coin", url: "https://freetoncoin.in?ref=asvt3n4mKW",                coin: "TON"   },
+            { name: "Free BNB",      url: "https://freebnb.in?ref=C6XK04weNv",                    coin: "BNB"   }
         ];
 
         // ===== GERAR GRID =====
         const grid = document.getElementById('faucetGrid');
         faucetList.forEach((faucet, index) => {
-            // Tenta extrair o domínio para a imagem de fallback
             let domain = '';
-            try {
-                domain = new URL(faucet.url).hostname.replace('www.', '');
-            } catch (e) {
-                domain = 'faucet';
-            }
+            try { domain = new URL(faucet.url).hostname.replace('www.', ''); } catch(e) { domain = 'faucet'; }
 
             const card = document.createElement('div');
             card.className = 'phone-card';
@@ -326,12 +253,11 @@
                 <div class="phone-mock">
                     <div class="phone-notch"></div>
                     <div class="phone-screen">
-                        <img class="miner-img" loading="lazy" decoding="async" 
-                             src="https://www.google.com/s2/favicons?domain=${domain}&sz=128" 
+                        <img class="miner-img" loading="lazy" decoding="async"
+                             src="https://www.google.com/s2/favicons?domain=${domain}&sz=128"
                              onerror="this.src='https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530/128/color/${faucet.coin.toLowerCase()}.png'; this.onerror=null;"
                              alt="${faucet.name}">
                         <div class="miner-name">${faucet.name}</div>
-                        <div class="miner-sub">${faucet.sub}</div>
                     </div>
                 </div>
                 <div class="btn-wrap">
@@ -342,67 +268,7 @@
         });
 
         // ===== CLICK TRACKER =====
-        window.trackClick = function(name){
-            console.log('Clique rastreado:', name);
-            // Atualiza o contador de cliques
-            const liveClicksEl = document.getElementById('liveClicks');
-            if (liveClicksEl) {
-                let current = parseInt(liveClicksEl.textContent.replace(/[^0-9]/g, '')) || 3200;
-                liveClicksEl.textContent = (current + 1).toLocaleString();
-            }
-        };
-
-        // ===== TOASTS =====
-        const names = ['Carlos','Maria','João','Ana','Pedro','Luisa','Rafael','Beatriz','Lucas','Fernanda'];
-        const tc = document.getElementById('toastContainer');
-
-        function showToast(){
-            const n = names[Math.floor(Math.random() * names.length)];
-            const f = faucetList[Math.floor(Math.random() * faucetList.length)].name;
-            const amount = (Math.random() * 15 + 2).toFixed(1);
-            
-            const t = document.createElement('div');
-            t.className = 'toast';
-            t.innerHTML = `<span class="toast-icon">💸</span><span class="toast-text"><strong>${n}</strong> ganhou ${amount} USDT no ${f}</span>`;
-            tc.appendChild(t);
-            
-            requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
-            
-            setTimeout(() => { 
-                t.classList.remove('show'); 
-                setTimeout(() => t.remove(), 450); 
-            }, 4000);
-            
-            while(tc.children.length > 2) tc.removeChild(tc.firstChild);
-        }
-        setTimeout(showToast, 2000);
-        setInterval(showToast, 8000);
-
-        // ===== LIVE BAR =====
-        let liveCount = 142;
-        let liveEarned = 2450;
-        const liveCountEl = document.getElementById('liveCount');
-        const liveEarnedEl = document.getElementById('liveEarned');
-        const liveClicksEl = document.getElementById('liveClicks');
-
-        function updateLiveBar(){
-            liveCount += Math.floor(Math.random() * 5) - 2;
-            liveCount = Math.max(120, Math.min(180, liveCount));
-            
-            if (Math.random() > 0.7) {
-                liveEarned += Math.floor(Math.random() * 15);
-            }
-            
-            if (liveCountEl) liveCountEl.textContent = liveCount;
-            if (liveEarnedEl) liveEarnedEl.textContent = (liveEarned / 1000).toFixed(1) + 'k';
-            if (liveClicksEl) {
-                let clicks = parseInt(liveClicksEl.textContent.replace(/[^0-9]/g, '')) || 3200;
-                clicks += Math.floor(Math.random() * 5);
-                liveClicksEl.textContent = clicks.toLocaleString();
-            }
-        }
-        setInterval(updateLiveBar, 7000);
-        updateLiveBar();
+        window.trackClick = function(name){ console.log('Clique:', name); };
 
         // ===== PARTÍCULAS DE FUNDO =====
         const canvas = document.getElementById('particle-canvas');
@@ -462,7 +328,7 @@
         window.addEventListener('resize', resizeC);
         resizeC(); animate();
 
-        // ===== TRAIL SIMPLES: PARTÍCULAS VERDES =====
+        // ===== TRAIL: PARTÍCULAS VERDES =====
         const tCanvas = document.createElement('canvas');
         tCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;';
         document.body.appendChild(tCanvas);
