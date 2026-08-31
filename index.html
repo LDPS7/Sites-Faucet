@@ -240,146 +240,146 @@
 
     <script>
     (function () {
-        // ===== LISTA DE FAUCETS COM DESCRIÇÕES =====
+        // ===== LISTA DE FAUCETS COM DESCRIÇÕES (cards 1, 3, 12 e 13 removidos) =====
         const faucetList = [
-            { 
-                name: "Althub",        
-                url: "https://althub.club/r/206100",                          
-                coin: "TRX",
-                desc: "Ganhe TRX e outras moedas com reivindicações regulares, pesquisas e sistema de indicação."
-            },
+            // Card 1 removido (Althub)
+            // Card 2: Doge Pick (agora número 1)
             { 
                 name: "Doge Pick",     
                 url: "https://dogepick.io/?ref=lucianoldps7",                  
                 coin: "DOGE",
                 desc: "Faucet especializado em Dogecoin, com reivindicações frequentes e recompensas extras."
             },
-            { 
-                name: "Cekip Faucet",  
-                url: "https://faucet.cekip.site/?r=5770",                     
-                coin: "BTC",
-                desc: "Plataforma confiável para ganhar Bitcoin, com saques mínimos acessíveis e pagamentos rápidos."
-            },
+            // Card 3 removido (Cekip Faucet)
+            // Card 4: Ton Pick (agora número 2)
             { 
                 name: "Ton Pick",      
                 url: "https://tonpick.game/?ref=lucianoldps7",                 
                 coin: "TON",
                 desc: "Ganhe TON Coin através de reivindicações diárias, jogos e tarefas simples na plataforma."
             },
+            // Card 5: Faucet Crypto (agora número 3)
             { 
                 name: "Faucet Crypto", 
                 url: "https://faucetcrypto.com/r/4188807",                    
                 coin: "BTC",
                 desc: "Uma das mais completas: ganhe várias criptomoedas com faucet, cliques, tarefas e pesquisas."
             },
+            // Card 6: Faucetoshi (agora número 4)
             { 
                 name: "Faucetoshi",    
                 url: "https://faucetoshi.com/?r=188401",                      
                 coin: "BTC",
                 desc: "Reivindique recompensas instantâneas, saque a partir de apenas $0,01 direto para FaucetPay."
             },
+            // Card 7: Sol Pick (agora número 5)
             { 
                 name: "Sol Pick",      
                 url: "https://solpick.io/?ref=lucianoldps",                  
                 coin: "SOL",
                 desc: "Ganhe Solana de forma fácil, com reivindicações periódicas e sistema de recompensas por atividade."
             },
+            // Card 8: Earn Bonk (agora número 6)
             { 
                 name: "Earn Bonk",     
                 url: "https://earn-bonk.com/?r=9057c178c9f9",                
                 coin: "BONK",
                 desc: "Ganhe tokens BONK gratuitos, com até 100 reivindicações por dia e saques instantâneos."
             },
+            // Card 9: Earn Pepe (agora número 7)
             { 
                 name: "Earn Pepe",     
                 url: "https://earn-pepe.com/?ref=nZJG",                      
                 coin: "PEPE",
                 desc: "Várias formas de ganhar PEPE: faucet, links curtos, anúncios, tarefas, jogos e indicações."
             },
+            // Card 10: Feyorra (agora número 8)
             { 
                 name: "Feyorra",       
                 url: "https://feyorra.site/?ref=BQe5",                       
                 coin: "BTC",
                 desc: "Ecossistema completo com faucet ilimitado, recompensas por cliques e saques automáticos."
             },
+            // Card 11: Earn Trump (agora número 9)
             { 
                 name: "Earn Trump",    
                 url: "https://earn-trump.com/?r=8857fe7b878a",               
                 coin: "TRUMP",
                 desc: "Ganhe tokens $TRUMP gratuitos, com verificações simples e saques diretos para FaucetPay."
             },
-            { 
-                name: "Ban Faucet",    
-                url: "https://banfaucet.com/?r=238156",                      
-                coin: "BTC",
-                desc: "Reivindique criptomoedas a cada 5 minutos, participe de loterias e desafios para ganhar mais."
-            },
-            { 
-                name: "Lite Stake",    
-                url: "https://litestake.io/?ref=lucianoldps7",               
-                coin: "LTC",
-                desc: "Ganhe Litecoin com reivindicações regulares, recompensas por nível e comissões de indicação."
-            },
+            // Card 12 removido (Ban Faucet)
+            // Card 13 removido (Lite Stake)
+            // Card 14: Fire Faucet (agora número 10)
             { 
                 name: "Fire Faucet",   
                 url: "https://firefaucet.win/ref/1540547",                    
                 coin: "BTC",
                 desc: "Suporta 15 criptomoedas e cartões-presente, com bônus diários, níveis e recompensas extras."
             },
+            // Card 15: LTC Fast (agora número 11)
             { 
                 name: "LTC Fast",      
                 url: "https://ltcfast.live?ref=lucianoldps",                  
                 coin: "LTC",
                 desc: "Ganhe Litecoin através de faucet, pesquisas e jogos, além de ganhos com convites de amigos."
             },
+            // Card 16: Free Ton Coin (agora número 12)
             { 
                 name: "Free Ton Coin", 
                 url: "https://freetoncoin.in?ref=asvt3n4mKW",                
                 coin: "TON",
                 desc: "Reivindique até 1,2 TON por hora, responda pesquisas e multiplique ganhos em jogos justos."
             },
+            // Card 17: Free BNB (agora número 13)
             { 
                 name: "Free BNB",      
                 url: "https://freebnb.in?ref=C6XK04weNv",                    
                 coin: "BNB",
                 desc: "Ganhe tokens BNB gratuitos com reivindicações periódicas, tarefas e sistema de recompensas."
             },
+            // Card 18: BTC Adspace (agora número 14)
             { 
                 name: "BTC Adspace",   
                 url: "https://btcadspace.com/ref/lucianoldps7",              
                 coin: "BTC",
                 desc: "Ganhe Bitcoin visualizando anúncios, acessando links e completando tarefas diárias simples."
             },
+            // Card 19: FaucetPayz (agora número 15)
             { 
                 name: "FaucetPayz",    
                 url: "https://faucetpayz.com/ref/lucianoldps7",              
                 coin: "BTC",
                 desc: "Plataforma integrada com carteiras digitais, com várias opções de ganhos e saques rápidos."
             },
+            // Card 20: CoinPayz (agora número 16)
             { 
                 name: "CoinPayz",      
                 url: "https://coinpayz.xyz/?r=788168",                       
                 coin: "BTC",
                 desc: "Ganhe criptomoedas com faucet, cliques e tarefas, com valores acessíveis para saque."
             },
+            // Card 21: Tap Coin (agora número 17)
             { 
                 name: "Tap Coin",      
                 url: "https://tap-coin.de/refer/user/76499",                 
                 coin: "TAP",
                 desc: "Ganhe tokens TAP com toques na tela, recompensas diárias e progressão de níveis na plataforma."
             },
+            // Card 22: Aruble (agora número 18)
             { 
                 name: "Aruble",      
                 url: "https://aruble.net/?ref=8OGdJka0pI",                 
                 coin: "ARB",
                 desc: "Plataforma completa com faucet, ofertas, tarefas, vídeos e jogos para ganhos diários consistentes."
             },
+            // Card 23: Bitcoearn (agora número 19)
             { 
                 name: "Bitcoearn",      
                 url: "https://bitcoearn.com/i/7557",                 
                 coin: "BTC",
                 desc: "Ganhe Bitcoin grátis com reivindicações diárias, tarefas e sistema de referência."
             },
+            // Card 24: USD4You (agora número 20)
             { 
                 name: "USD4You",      
                 url: "https://usd4you.com/index.php?ref=5cfec27815",                 
